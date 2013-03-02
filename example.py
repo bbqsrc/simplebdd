@@ -4,12 +4,6 @@ class ExampleTest(simplebdd.Test):
     class Examples(simplebdd.Description):
         """A set of example tests"""
 
-        def pre_test(self):
-            pass
-
-        def post_test(self):
-            pass
-
         def it_should_exhibit_workingness(self):
             """it should exhibit that this works"""
             return True
@@ -28,10 +22,12 @@ class ExampleTest(simplebdd.Test):
 
     class Examples2(simplebdd.Description):
         """A second set of examples"""
+        def pre_test(self):
+            self.foo = 42
 
-        def it_should_pass(self):
-            """it should pass"""
-            return True
+        def it_should_have_42(self):
+            """it should have a member foo with 42"""
+            return getattr(self, 'foo', None) == 42
 
 if __name__ == "__main__":
     ExampleTest().run()

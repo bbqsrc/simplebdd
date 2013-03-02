@@ -38,10 +38,15 @@ class Description(metaclass=_DescMeta):
 
         for test_name in self._tests:
             test = getattr(self, test_name)
+            pre = getattr(self, 'pre_test', None)
+            post = getattr(self, 'post_test', None)
             it = test.__doc__
 
             try:
+                if pre: pre()
                 result = test()
+                if post: post()
+
                 self.test.it_output(it, result)
                 self.test.increment(result)
             except Exception as e:
