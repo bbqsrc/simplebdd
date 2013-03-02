@@ -26,5 +26,12 @@ class ExampleTest(simplebdd.Test):
             """it should attribute error"""
             self.foo
 
+    class Examples2(simplebdd.Description):
+        """A second set of examples"""
+
+        def it_should_pass(self):
+            """it should pass"""
+            return True
+
 if __name__ == "__main__":
     ExampleTest().run()

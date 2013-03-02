@@ -71,7 +71,7 @@ class Test(metaclass=_TestMeta):
             self.pending += 1
 
     def describe_output(self, desc):
-        print(desc)
+        print("\n" + desc)
 
     def it_output(self, it, result):
         if result == True:
@@ -85,7 +85,6 @@ class Test(metaclass=_TestMeta):
 
     def final_output(self):
         print()
-
         ts = colored("(%.3fs)" % (time.time() - self.start), attrs=['bold'])
 
         if self.fails > 0:
