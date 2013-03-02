@@ -10,7 +10,7 @@ def imports_by_path(path):
     fpath, fn = os.path.split(path)
     if fn.endswith('.py'):
         path = fpath
-        fns = [fn[:-3]]
+        fns = [fn]
     else:
         fns = [os.path.basename(x) for x in glob.glob(os.path.join(path, '*.py'))]
         
