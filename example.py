@@ -1,7 +1,7 @@
-import simplebdd
+from simplebdd import Test, Description
 
-class ExampleTest(simplebdd.Test):
-    class Examples(simplebdd.Description):
+class ExampleTest(Test):
+    class Examples(Description):
         """A set of example tests"""
 
         def it_should_exhibit_workingness(self):
@@ -20,9 +20,9 @@ class ExampleTest(simplebdd.Test):
             """it should attribute error"""
             self.foo
 
-    class Examples2(simplebdd.Description):
+    class Examples2(Description):
         """A second set of examples"""
-        def pre_test(self):
+        def before_tests(self):
             self.foo = 42
 
         def it_should_have_42(self):

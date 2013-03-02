@@ -36,22 +36,29 @@ class Description(metaclass=_DescMeta):
     def run(self):
         self.test.describe_output(self.__doc__)
 
+        before_each = getattr(self, 'before_each_test', None)
+        after_each = getattr(self, 'after_each_test', None)
+        before_all = getattr(self, 'before_tests', None)
+        after_all = getattr(self, 'after_tests', None)
+
+        if before_all: before_all()
+
         for test_name in self._tests:
             test = getattr(self, test_name)
-            pre = getattr(self, 'pre_test', None)
-            post = getattr(self, 'post_test', None)
             it = test.__doc__
 
             try:
-                if pre: pre()
+                if before_each: before_each()
                 result = test()
-                if post: post()
+                if after_each: after_each()
 
                 self.test.it_output(it, result)
                 self.test.increment(result)
             except Exception as e:
                 self.test.it_output(it, e)
                 self.test.increment(e)
+
+        if after_all: after_all()
 
 
 class Test(metaclass=_TestMeta):
