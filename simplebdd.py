@@ -65,7 +65,7 @@ class Test(metaclass=_TestMeta):
     def increment(self, result):
         if result == True:
             self.passes += 1
-        elif result in (False, Exception):
+        elif result == False or isinstance(result, Exception):
             self.fails += 1
         else:
             self.pending += 1
