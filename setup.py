@@ -7,7 +7,7 @@ setup(name='simplebdd',
       description='Simple Behaviour Driven Development Framework',
       author='Brendan Molloy',
       author_email='brendan@bbqsrc.net',
-      url='https://github.com/bbqsrc/simplebdd',
+      url='http://brendan.so/projects/simplebdd',
       packages=['simplebdd'],
       scripts=['scripts/simplebdd']
      )
