@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='simplebdd',
-      version='0.1',
+      version='0.2',
       description='Simple Behaviour Driven Development Framework',
       author='Brendan Molloy',
       author_email='brendan@bbqsrc.net',
