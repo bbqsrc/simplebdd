@@ -198,10 +198,10 @@ class HTMLOutput(Output):
         ts = "(%.3fs)" % ts
 
         if fails > 0:
-            print("<p>&times; %s » %s passed • %s failed • %s pending %s</p>" %
+            print("<p>&times; %s » %s passed &bull; %s failed &bull; %s pending %s</p>" %
                     ("FAIL", passes, fails, pending, ts))
         else:
-            print("<p>&#10003; %s » %s passed • %s pending %s</p>" %
+            print("<p>&#10003; %s » %s passed &bull; %s pending %s</p>" %
                     ("PASS", passes, pending, ts))
 
 class NoOutput:
