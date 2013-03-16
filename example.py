@@ -34,6 +34,3 @@ class ExampleTest(Test):
         def it_should_have_42(self):
             """it should have a member foo with 42"""
             return getattr(self, 'foo', None) == 42
-
-if __name__ == "__main__":
-    ExampleTest().run()
