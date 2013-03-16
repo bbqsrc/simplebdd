@@ -5,7 +5,7 @@ import glob
 import os
 import sys
 
-from simplebdd import Test, Output, HTMLOutput
+from simplebdd import Test, Output, HTMLOutput, NoOutput
 
 
 def imports_by_path(path):
@@ -30,7 +30,12 @@ def cli():
     p.add_argument("-q", "--quiet", action="store_true", help="Silent mode")
 
     args = p.parse_args()
-    output = HTMLOutput() if args.html else Output()
+    if args.quiet:
+        output = NoOutput()
+    elif args.html:
+        output = HTMLOutput()
+    else:
+        output = Output()
 
     modules = imports_by_path(args.test[0])
     exit_code = 0
