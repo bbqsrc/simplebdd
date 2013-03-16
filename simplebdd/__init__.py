@@ -19,6 +19,7 @@ class TestThread(Thread):
         self.context = context
         self.func = partial(func, context)
         self.func.__doc__ = func.__doc__
+        self.func.__name__ = func.__name__
 
     def run(self):
         self.context.run_test(self.func)
@@ -65,18 +66,23 @@ class Description(metaclass=_DescMeta):
 
         before_each = getattr(self, 'before_each_test', None)
         after_each = getattr(self, 'after_each_test', None)
-        it = test.__doc__
+        it = test.__doc__ or test.__name__.replace('_', ' ')
 
         try:
-            if before_each: before_each()
+            if before_each:
+                before_each()
             result = test()
-            if after_each: after_each()
 
             output.it(it, result)
             self.test.increment(result)
+
         except Exception as e:
             output.it(it, e)
             self.test.increment(e)
+
+        finally:
+            if after_each:
+                after_each()
 
     def run(self, output):
         self.output = output
@@ -211,6 +217,13 @@ class HTMLOutput(Output):
         else:
             print("<p>✓ %s » %s passed • %s pending %s</p>" %
                     ("PASS", passes, pending, ts))
+
+class NoOutput:
+    def describe(self, msg): pass
+    def it(self, it, result): pass
+    def final(self, passes, fails, pending, ts): pass
+
+
 
 def import_path(fullpath):
     """

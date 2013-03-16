@@ -15,8 +15,10 @@ def imports_by_path(path):
         fns = [fn]
     else:
         fns = [os.path.basename(x) for x in glob.glob(os.path.join(path, '*.py'))]
-
-    sys.path.append(path)
+    
+    # needs to be at front or test.py wont work
+    sys.path.insert(0, path) 
+    
     return [__import__(fn[:-3]) for fn in fns]
 
 
@@ -25,10 +27,13 @@ def cli():
     p.description = "A simple implementation of a behaviour-driven development style testing framework."
     p.add_argument("test", nargs=1, help="Test file or directory")
     p.add_argument("--html", action="store_true", help="Output HTML")
+    p.add_argument("-q", "--quiet", action="store_true", help="Silent mode")
+
     args = p.parse_args()
     output = HTMLOutput() if args.html else Output()
 
     modules = imports_by_path(args.test[0])
+    exit_code = 0
     for module in modules:
         tests = []
 
@@ -41,7 +46,12 @@ def cli():
                 pass
 
         for test in tests:
-            test().run(output)
+            instance = test()
+            instance.run(output)
+            if instance.fails > 0:
+                exit_code = 1
+    return exit_code
+
 
 if __name__ == "__main__":
-    cli()
+    sys.exit(cli())
