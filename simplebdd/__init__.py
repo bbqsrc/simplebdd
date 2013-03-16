@@ -142,57 +142,40 @@ class Test(metaclass=_TestMeta):
         else:
             self.pending += 1
 
-    def describe_output(self, desc):
-        print("\n" + desc)
-
-    def it_output(self, it, result):
-        if result == True:
-            print("  ✓ %s" % colored(it, 'green'))
-        elif result == False:
-            print("  × %s" % colored(it, 'red'))
-        elif isinstance(result, Exception):
-            print("  × %s" % (colored("%s [%s]" % (it, result), 'red')))
-        else:
-            print("  - %s" % colored(it, 'cyan'))
-
-    def final_output(self):
-        print()
-        ts = colored("(%.3fs)" % (time.time() - self.start), attrs=['bold'])
-
-        if self.fails > 0:
-            print("× %s » %s passed • %s failed • %s pending %s" %
-                    (colored("FAIL", "red"), self.passes, self.fails, self.pending, ts))
-        else:
-            print("✓ %s » %s passed • %s pending %s" %
-                    (colored("PASS", "green"), self.passes, self.pending, ts))
-
 
 class Output:
+    def __init__(self):
+        # Workaround Window's fail understanding of Unicode.
+        self.tick = '✓' if os.name != "nt" else "[PASS]"
+        self.cross = '×' if os.name != "nt" else "[FAIL]"
+
     def describe(self, desc):
         print("\n" + desc)
 
     def it(self, it, result):
         if result == True:
-            print("  ✓ %s" % colored(it, 'green'))
+            print("  %s %s" % (self.tick, colored(it, 'green')))
         elif result == False:
-            print("  × %s" % colored(it, 'red'))
+            print("  %s %s" % (self.cross, colored(it, 'red')))
         elif isinstance(result, Exception):
             tb = traceback.extract_tb(sys.exc_info()[2])
             x = "\n".join(["      {0}:{1}#{2}\n        {3}".format(*x) for x in tb])
-            print("  × %s" % (colored("%s [%s (%s)]\n%s" %
-                (it, result, type(result).__name__, x), 'red')))
+            print("  %s %s" % (self.cross, (colored("%s [%s (%s)]\n%s" %
+                (it, result, type(result).__name__, x), 'red'))))
         else:
             print("  - %s" % colored(it, 'cyan'))
 
     def final(self, passes, fails, pending, ts):
-        ts = colored("(%.3fs)" % ts, attrs=['bold'])
+        ts = colored("({}s)".format("%.3f" % ts), attrs=['bold'])
 
         if fails > 0:
-            print("\n× %s » %s passed • %s failed • %s pending %s" %
-                    (colored("FAIL", "red"), passes, fails, pending, ts))
+            print("\n%s %s » %s passed • %s failed • %s pending %s" %
+                    (self.cross, colored("FAIL", "red"), passes, fails,
+                     pending, ts))
         else:
-            print("\n✓ %s » %s passed • %s pending %s" %
-                    (colored("PASS", "green"), passes, pending, ts))
+            print("\n%s %s » %s passed • %s pending %s" %
+                    (self.tick, colored("PASS", "green"), passes, pending, ts))
+
 
 class HTMLOutput(Output):
     def describe(self, desc):
@@ -200,22 +183,22 @@ class HTMLOutput(Output):
 
     def it(self, it, result):
         if result == True:
-            print("<p>  ✓ %s</p>" % it)
+            print("<p>&#10003; %s</p>" % it)
         elif result == False:
-            print("<p>  × %s</p>" % it)
+            print("<p>&times; %s</p>" % it)
         elif isinstance(result, Exception):
-            print("<p>  × %s [%s]</p>" % (it, result))
+            print("<p>&times; %s [%s]</p>" % (it, result))
         else:
-            print("<p>  - %s</p>" % it)
+            print("<p>- %s</p>" % it)
 
     def final(self, passes, fails, pending, ts):
         ts = "(%.3fs)" % ts
 
         if fails > 0:
-            print("<p>× %s » %s passed • %s failed • %s pending %s</p>" %
+            print("<p>&times; %s » %s passed • %s failed • %s pending %s</p>" %
                     ("FAIL", passes, fails, pending, ts))
         else:
-            print("<p>✓ %s » %s passed • %s pending %s</p>" %
+            print("<p>&#10003; %s » %s passed • %s pending %s</p>" %
                     ("PASS", passes, pending, ts))
 
 class NoOutput:
