@@ -4,11 +4,35 @@ import traceback
 import os
 import sys
 
+from threading import Thread
+from functools import wraps, partial
 try:
     from termcolor import colored
 except:
     def colored(x, *args, **kwargs):
         return x
+
+
+class TestThread(Thread):
+    def __init__(self, context, func):
+        Thread.__init__(self)
+        self.context = context
+        self.func = partial(func, context)
+        self.func.__doc__ = func.__doc__
+
+    def run(self):
+        self.context.run_test(self.func)
+
+
+def async(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        thread = TestThread(self, func)
+        self._threads.append(thread)
+        return thread
+    setattr(wrapper, 'async', True)
+    return wrapper
+
 
 class _DescMeta(type):
     @classmethod
@@ -36,11 +60,30 @@ class Description(metaclass=_DescMeta):
     def __init__(self, test):
         self.test = test
 
-    def run(self, output):
-        output.describe(self.__doc__)
+    def run_test(self, test):
+        output = self.output
 
         before_each = getattr(self, 'before_each_test', None)
         after_each = getattr(self, 'after_each_test', None)
+        it = test.__doc__
+
+        try:
+            if before_each: before_each()
+            result = test()
+            if after_each: after_each()
+
+            output.it(it, result)
+            self.test.increment(result)
+        except Exception as e:
+            output.it(it, e)
+            self.test.increment(e)
+
+    def run(self, output):
+        self.output = output
+        self._threads = []
+
+        output.describe(self.__doc__)
+
         before_all = getattr(self, 'before_tests', None)
         after_all = getattr(self, 'after_tests', None)
 
@@ -48,18 +91,13 @@ class Description(metaclass=_DescMeta):
 
         for test_name in self._tests:
             test = getattr(self, test_name)
-            it = test.__doc__
+            if getattr(test, 'async', False):
+                test().start()
+            else:
+                self.run_test(test)
 
-            try:
-                if before_each: before_each()
-                result = test()
-                if after_each: after_each()
-
-                output.it(it, result)
-                self.test.increment(result)
-            except Exception as e:
-                output.it(it, e)
-                self.test.increment(e)
+        for thread in self._threads:
+            thread.join()
 
         if after_all: after_all()
 
