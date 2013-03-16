@@ -148,6 +148,7 @@ class Output:
         # Workaround Window's fail understanding of Unicode.
         self.tick = '✓' if os.name != "nt" else "[PASS]"
         self.cross = '×' if os.name != "nt" else "[FAIL]"
+        self.bullet = '•' if os.name != "nt" else "-"
 
     def describe(self, desc):
         print("\n" + desc)
@@ -169,11 +170,13 @@ class Output:
         ts = colored("({}s)".format("%.3f" % ts), attrs=['bold'])
 
         if fails > 0:
-            print("\n%s %s » %s passed • %s failed • %s pending %s" %
+            print("\n%s %s » %s passed {b} %s failed {b} %s pending %s"
+                    .format(b=self.bullet) %
                     (self.cross, colored("FAIL", "red"), passes, fails,
                      pending, ts))
         else:
-            print("\n%s %s » %s passed • %s pending %s" %
+            print("\n%s %s » %s passed {b} %s pending %s"
+                    .format(b=self.bullet) %
                     (self.tick, colored("PASS", "green"), passes, pending, ts))
 
 
