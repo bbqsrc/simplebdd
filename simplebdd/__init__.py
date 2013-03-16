@@ -212,11 +212,11 @@ class HTMLOutput(Output):
         ts = "(%.3fs)" % ts
 
         if fails > 0:
-            print("<p>× %s » %s passed • %s failed • %s pending %s</p>" %
-                    ("FAIL", passes, fails, pending, ts))
+            print(("<p>× %s » %s passed • %s failed • %s pending %s</p>" %
+                    ("FAIL", passes, fails, pending, ts)).encode('utf-8'))
         else:
-            print("<p>✓ %s » %s passed • %s pending %s</p>" %
-                    ("PASS", passes, pending, ts))
+            print(("<p>✓ %s » %s passed • %s pending %s</p>" %
+                    ("PASS", passes, pending, ts)).encode('utf-8'))
 
 class NoOutput:
     def describe(self, msg): pass
