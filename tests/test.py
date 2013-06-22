@@ -1,6 +1,4 @@
-import simplebdd
 from simplebdd import Description, Context, async
-from time import sleep
 
 class List(Description):
     """List"""
