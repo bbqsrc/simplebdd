@@ -8,6 +8,14 @@ class List(Description):
     class AList(Context):
         """A list"""
 
+        def it_has_the_type_list(self):
+            """has the type 'list'"""
+            return isinstance([], list)
+
+        def it_makes_rum(self):
+            """has a distillery embedded"""
+            pass
+
         class WithThreeElements(Context):
             """with three elements"""
 
