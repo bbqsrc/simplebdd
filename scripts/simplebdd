@@ -5,7 +5,7 @@ import glob
 import os
 import sys
 
-from simplebdd import Test, Output, HTMLOutput, NoOutput
+from simplebdd import Description, Output, HTMLOutput, NoOutput
 
 
 def imports_by_path(path):
@@ -40,17 +40,17 @@ def cli():
     modules = imports_by_path(args.test[0])
     exit_code = 0
     for module in modules:
-        tests = []
+        descriptions = []
 
         for x in dir(module):
             y = getattr(module, x)
             try:
-                if Test in y.__bases__:
-                    tests.append(y)
+                if Description in y.__bases__:
+                    descriptions.append(y)
             except:
                 pass
 
-        for test in tests:
+        for test in descriptions:
             instance = test()
             instance.run(output)
             if instance.fails > 0:

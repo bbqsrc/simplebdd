@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='simplebdd',
-      version='0.2',
+      version='0.3',
       description='Simple Behaviour Driven Development Framework',
       author='Brendan Molloy',
       author_email='brendan@bbqsrc.net',
@@ -13,7 +13,7 @@ setup(name='simplebdd',
       packages=['simplebdd'],
       scripts=['scripts/simplebdd'],
       classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Testing',

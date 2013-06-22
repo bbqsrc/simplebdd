@@ -35,31 +35,45 @@ def async(func):
     return wrapper
 
 
-class _DescMeta(type):
+class _ContextMeta(type):
     @classmethod
     def __prepare__(metacls, name, bases, **kwds):
         return collections.OrderedDict()
 
     def __new__(cls, name, bases, classdict):
         result = type.__new__(cls, name, bases, dict(classdict))
+        result._contexts = tuple([x for x in tuple(classdict) if isinstance(classdict[x], _ContextMeta.__class__)])
         result._tests = tuple([x for x in tuple(classdict) if x.startswith("it_")])
+        #print("CtxMeta::%r:\n  %r\n  %r" % (cls, dict(classdict), result._tests))
         return result
 
 
-class _TestMeta(type):
+class _DescriptionMeta(type):
     @classmethod
     def __prepare__(metacls, name, bases, **kwds):
         return collections.OrderedDict()
 
     def __new__(cls, name, bases, classdict):
         result = type.__new__(cls, name, bases, dict(classdict))
-        result._descriptions = tuple([x for x in tuple(classdict) if isinstance(classdict[x], Description.__class__)])
+        result._contexts = tuple([x for x in tuple(classdict) if\
+            isinstance(classdict[x], Context.__class__)])
+        #print("DescMeta::%r:\n  %r\n  %r" % (cls, dict(classdict), result._contexts))
         return result
 
 
-class Description(metaclass=_DescMeta):
-    def __init__(self, test):
-        self.test = test
+class Context(metaclass=_ContextMeta):
+    def __init__(self, description, parent=None):
+        self.description = description
+        self.parent = parent
+
+    @property
+    def context_name(self):
+        out = self.__doc__ or self.__name__.replace('_', ' ')
+        o = self
+        while o.parent is not None:
+            o = o.parent
+            out = "%s %s" % (o.__doc__ or o.__name__.replace('_', ' '), out)
+        return out
 
     def run_test(self, test):
         output = self.output
@@ -74,11 +88,11 @@ class Description(metaclass=_DescMeta):
             result = test()
 
             output.it(it, result)
-            self.test.increment(result)
+            self.description.increment(result)
 
         except Exception as e:
             output.it(it, e)
-            self.test.increment(e)
+            self.description.increment(e)
 
         finally:
             if after_each:
@@ -86,9 +100,10 @@ class Description(metaclass=_DescMeta):
 
     def run(self, output):
         self.output = output
+
         self._threads = []
 
-        output.describe(self.__doc__)
+        output.describe(self.context_name)
 
         before_all = getattr(self, 'before_tests', None)
         after_all = getattr(self, 'after_tests', None)
@@ -105,10 +120,14 @@ class Description(metaclass=_DescMeta):
         for thread in self._threads:
             thread.join()
 
+        for ctx_name in self._contexts:
+            ctx = getattr(self, ctx_name)
+            ctx(self.description, self).run(self.output)
+
         if after_all: after_all()
 
 
-class Test(metaclass=_TestMeta):
+class Description(metaclass=_DescriptionMeta):
     def run(self, output):
         self.passes = 0
         self.fails = 0
@@ -123,10 +142,10 @@ class Test(metaclass=_TestMeta):
 
         if before_all: before_all()
 
-        for description_name in self._descriptions:
-            description = getattr(self, description_name)(self)
+        for context_name in self._contexts:
+            context = getattr(self, context_name)(self)
             if before_each: before_each()
-            description.run(output)
+            context.run(output)
             if after_each: after_each()
 
         if after_all: after_all()
@@ -145,7 +164,7 @@ class Test(metaclass=_TestMeta):
 
 class Output:
     def __init__(self):
-        # Workaround Window's fail understanding of Unicode.
+        # Workaround Windows' fail understanding of Unicode.
         self.tick = '✓' if os.name != "nt" else "[PASS]"
         self.cross = '×' if os.name != "nt" else "[FAIL]"
         self.bullet = '•' if os.name != "nt" else "-"
